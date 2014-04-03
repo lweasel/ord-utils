@@ -1,5 +1,8 @@
+import sys
+
 from distutils.core import setup
 from setuptools.command.test import test as TestCommand
+
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -19,6 +22,8 @@ setup(
     install_requires=[
         "schema >= 0.2.0"
     ],
+    tests_require=['pytest'],
+    cmdclass={'test': PyTest},
     extras_require={
         'testing': ['pytest'],
     }
