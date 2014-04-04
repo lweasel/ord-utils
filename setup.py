@@ -1,3 +1,4 @@
+import ordutils
 import sys
 
 from distutils.core import setup
@@ -5,6 +6,7 @@ from setuptools.command.test import test as TestCommand
 
 # Many parts liberally adapted from
 # "http://www.jeffknupp.com/blog/2013/08/16/open-sourcing-a-python-project-the-right-way/"
+
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -19,7 +21,7 @@ class PyTest(TestCommand):
 
 setup(
     name="OrdUtils",
-    version="0.1",
+    version=ordutils.__version__,
     packages=["ordutils"],
     install_requires=[
         "schema >= 0.2.0"
