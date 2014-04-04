@@ -1,4 +1,4 @@
-from options import \
+from ordutils.options import \
     validate_file_option, validate_dir_option, \
     validate_dict_option, validate_int_option
 from tempfile import mkdtemp, NamedTemporaryFile
