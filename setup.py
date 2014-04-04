@@ -3,7 +3,7 @@ import sys
 from distutils.core import setup
 from setuptools.command.test import test as TestCommand
 
-# Most parts liberally adapted from
+# Many parts liberally adapted from
 # "http://www.jeffknupp.com/blog/2013/08/16/open-sourcing-a-python-project-the-right-way/"
 
 class PyTest(TestCommand):
