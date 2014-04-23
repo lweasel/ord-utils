@@ -14,12 +14,13 @@ from schema import And, Or, Schema, Use
 import os.path
 
 
-def validate_file_option(file_option, msg, should_exist=True):
+def validate_file_option(file_option, msg, should_exist=True, nullable=False):
     """
     Check if a file specified by a command line option exists or not.
 
     Check if the file specified by a command line option exists or not, as
-    indicated by the parameter 'should_exist'. If the specified file fails the
+    indicated by the parameter 'should_exist'. The option can be allowed to
+    equal 'None' if 'nullable' is set to True. If the specified file fails the
     test, a SchemaError is raised.
 
     file_option: A string, the path to the file.
@@ -30,6 +31,8 @@ def validate_file_option(file_option, msg, should_exist=True):
     msg = "{msg}: '{file}'.".format(msg=msg, file=file_option)
     validator = open if should_exist else \
         lambda f: not os.path.exists(f)
+    if nullable:
+        validator = _nullable_validator(validator)
     Schema(validator, error=msg).validate(file_option)
 
 
@@ -53,7 +56,7 @@ def validate_dir_option(dir_option, msg, should_exist=True, nullable=False):
     validator = os.path.isdir if should_exist else \
         lambda f: not os.path.exists(f)
     if nullable:
-        validator = Or(validator, None)
+        validator = _nullable_validator(validator)
     Schema(validator, error=msg).validate(dir_option)
 
 
@@ -96,6 +99,10 @@ def validate_int_option(int_option, msg, nonneg=False, nullable=False):
     if nonneg:
         validator = And(validator, lambda x: x >= 0)
     if nullable:
-        validator = Or(validator, None)
+        validator = _nullable_validator(validator)
 
     return Schema(validator, error=msg).validate(int_option)
+
+
+def _nullable_validator(validator):
+    return Or(validator, None)

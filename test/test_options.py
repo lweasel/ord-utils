@@ -36,6 +36,15 @@ def test_validate_file_option_raises_exception_for_existing_file_if_file_should_
         validate_file_option(file_name, "dummy", should_exist=False)
 
 
+def test_validate_file_option_raises_exception_for_none_if_nullable_not_specified():
+    with pytest.raises(SchemaError):
+        validate_file_option(None, "dummy")
+
+
+def test_validate_file_option_does_not_raise_exception_for_none_if_nullable_specified():
+    validate_file_option(None, "dummy", nullable=True)
+
+
 def test_validate_file_option_exception_message_contains_correct_info():
     file = NamedTemporaryFile()
     file_name = file.name
