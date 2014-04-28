@@ -1,7 +1,7 @@
 from ordutils.options import \
     validate_file_option, validate_dir_option, \
     validate_dict_option, validate_int_option, \
-    validate_list_option
+    validate_list_option, check_boolean_value
 from tempfile import mkdtemp, NamedTemporaryFile
 from schema import SchemaError
 
@@ -185,6 +185,23 @@ def test_validate_list_option_raises_exception_for_invalid_value():
     option_string = separator.join([str(v) for v in option_values])
     with pytest.raises(SchemaError):
         validate_list_option(option_string, int, separator)
+
+
+def test_check_boolean_value_accepts_valid_true_strings():
+    for option_string in ["true", "t", "yes", "y"]:
+        assert check_boolean_value(option_string)
+        assert check_boolean_value(option_string.upper())
+
+
+def test_check_boolean_value_accepts_valid_false_strings():
+    for option_string in ["false", "f", "no", "n"]:
+        assert not check_boolean_value(option_string)
+        assert not check_boolean_value(option_string.upper())
+
+
+def test_check_boolean_value_raises_exception_for_invalid_string():
+    with pytest.raises(Exception):
+        check_boolean_value("not a boolean")
 
 
 def check_exception_message(exc_info, *args):

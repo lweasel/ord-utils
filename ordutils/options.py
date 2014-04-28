@@ -7,7 +7,7 @@ validate_dir_option: Check if a directory option exists or not.
 validate_dict_option: Check if a string option is a dictionary key.
 validate_list_option: Check if each of a list of items is valid.
 validate_int_option: Check if a string option represents an integer.
-
+check_boolean_value: Validates an option string represents a boolean value.
 """
 
 from schema import And, Or, Schema, Use
@@ -125,6 +125,27 @@ def validate_int_option(int_option, msg, nonneg=False, nullable=False):
         validator = _nullable_validator(validator)
 
     return Schema(validator, error=msg).validate(int_option)
+
+
+def check_boolean_value(option_string):
+    """
+    Validates that a command line option string represents a boolean value.
+
+    Check if a command line option string represents a valid boolean value.
+    Accepted strings for True are "true", "t", "yes", "y" or any cased variants
+    thereof. Accepted string for False are "false", "f", "no", "n" or any cased
+    variants thereof. Any other values are considered invalid, and supplying
+    them will cause an exception to be raised.
+
+    option_string: A command line option string representing a boolean value.
+    """
+    option_string = option_string.lower()
+    if option_string in ["true", "t", "yes", "y"]:
+        return True
+    elif option_string in ["false", "f", "no", "n"]:
+        return False
+    else:
+        raise Exception("Can't convert '{o}' to bool.".format(o=option_string))
 
 
 def _nullable_validator(validator):
