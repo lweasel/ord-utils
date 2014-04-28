@@ -1,6 +1,7 @@
 from ordutils.options import \
     validate_file_option, validate_dir_option, \
-    validate_dict_option, validate_int_option
+    validate_dict_option, validate_int_option, \
+    validate_list_option
 from tempfile import mkdtemp, NamedTemporaryFile
 from schema import SchemaError
 
@@ -160,6 +161,30 @@ def test_validate_int_option_exception_message_contains_correct_info():
         validate_int_option(str_val, msg)
 
     check_exception_message(exc_info, msg, str_val)
+
+
+def test_validate_list_option_returns_correct_number_of_items():
+    num_items = 5
+    separator = ";"
+    option_string = (("dummy" + separator) * num_items)[:-1]
+    assert len(validate_list_option(
+        option_string, lambda x: x, separator)) == num_items
+
+
+def test_validate_list_option_returns_transformed_objects():
+    option_values = [1, 5, 10]
+    separator = ","
+    option_string = separator.join([str(v) for v in option_values])
+    assert validate_list_option(option_string, int, separator) \
+        == option_values
+
+
+def test_validate_list_option_raises_exception_for_invalid_value():
+    option_values = [1, 5, "ten"]
+    separator = ","
+    option_string = separator.join([str(v) for v in option_values])
+    with pytest.raises(SchemaError):
+        validate_list_option(option_string, int, separator)
 
 
 def check_exception_message(exc_info, *args):

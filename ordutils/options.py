@@ -5,6 +5,7 @@ the 'schema' package. Exports:
 validate_file_option: Check if a file option exists or not.
 validate_dir_option: Check if a directory option exists or not.
 validate_dict_option: Check if a string option is a dictionary key.
+validate_list_option: Check if each of a list of items is valid.
 validate_int_option: Check if a string option represents an integer.
 
 """
@@ -58,6 +59,28 @@ def validate_dir_option(dir_option, msg, should_exist=True, nullable=False):
     if nullable:
         validator = _nullable_validator(validator)
     Schema(validator, error=msg).validate(dir_option)
+
+
+def validate_list_option(option, item_validator, separator=','):
+    """
+    Check if each of a list of items is valid according to some validator.
+
+    Check if each item of a command line option (which takes the form of string
+    representations of items separated by a specified separator string) is
+    valid according to the supplied item validator. Returns a list of objects,
+    the items transformed by the validator. If any item is not valid according
+    to the validator (i.e. the validator raised an exception), a SchemaError is
+    raised.
+
+    option: The command line option, a string.
+    item_validator: A type or callable to validate individual items in the
+    option string. Should raise an exception if an item is not valid. May
+    return transformed versions of items.
+    separator: String which separates the command line option string into
+    items.
+    """
+    items = option.split(separator)
+    return [Schema(Use(item_validator)).validate(i) for i in items]
 
 
 def validate_dict_option(dict_option, values_dict, msg):
