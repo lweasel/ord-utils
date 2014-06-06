@@ -80,7 +80,12 @@ def validate_list_option(option, item_validator, separator=','):
     items.
     """
     items = option.split(separator)
-    return [Schema(Use(item_validator)).validate(i) or i for i in items]
+
+    def validated_value(x):
+        validated = Schema(Use(item_validator)).validate(x)
+        return validated if validated is not None else x
+
+    return [validated_value(i) for i in items]
 
 
 def validate_dict_option(dict_option, values_dict, msg):
