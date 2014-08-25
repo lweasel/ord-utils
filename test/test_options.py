@@ -1,7 +1,8 @@
 from ordutils.options import \
     validate_file_option, validate_dir_option, \
     validate_dict_option, validate_int_option, \
-    validate_list_option, check_boolean_value
+    validate_options_list, check_boolean_value, \
+    validate_list_option
 from tempfile import mkdtemp, NamedTemporaryFile
 from schema import SchemaError
 
@@ -104,6 +105,28 @@ def test_validate_dir_option_exception_message_contains_correct_info():
     check_exception_message(exc_info, msg, dir_path)
 
 
+def test_validate_list_option_does_not_raise_exception_if_item_in_list():
+    values_list = [1, 2, 3]
+    validate_list_option(values_list[0], values_list, "dummy")
+
+
+def test_validate_list_option_raises_exception_if_item_not_in_list():
+    values_list = [1, 2, 3]
+    with pytest.raises(SchemaError):
+        validate_list_option(4, values_list, "dummy")
+
+
+def test_validate_list_option_exception_message_contains_correct_info():
+    values_list = [1, 2, 3]
+
+    msg = "dummy"
+    item = 4
+    with pytest.raises(SchemaError) as exc_info:
+        validate_list_option(item, values_list, msg)
+
+    check_exception_message(exc_info, msg, item)
+
+
 def test_validate_dict_option_returns_correct_dict_value():
     values_dict = {1: "one", 2: "two"}
     assert validate_dict_option(2, values_dict, "dummy") == "two"
@@ -163,28 +186,28 @@ def test_validate_int_option_exception_message_contains_correct_info():
     check_exception_message(exc_info, msg, str_val)
 
 
-def test_validate_list_option_returns_correct_number_of_items():
+def test_validate_options_list_returns_correct_number_of_items():
     num_items = 5
     separator = ";"
     option_string = (("dummy" + separator) * num_items)[:-1]
-    assert len(validate_list_option(
+    assert len(validate_options_list(
         option_string, lambda x: x, separator)) == num_items
 
 
-def test_validate_list_option_returns_transformed_objects():
+def test_validate_options_list_returns_transformed_objects():
     option_values = [1, 5, 10]
     separator = ","
     option_string = separator.join([str(v) for v in option_values])
-    assert validate_list_option(option_string, int, separator) \
+    assert validate_options_list(option_string, int, separator) \
         == option_values
 
 
-def test_validate_list_option_raises_exception_for_invalid_value():
+def test_validate_options_list_raises_exception_for_invalid_value():
     option_values = [1, 5, "ten"]
     separator = ","
     option_string = separator.join([str(v) for v in option_values])
     with pytest.raises(SchemaError):
-        validate_list_option(option_string, int, separator)
+        validate_options_list(option_string, int, separator)
 
 
 def test_check_boolean_value_accepts_valid_true_strings():

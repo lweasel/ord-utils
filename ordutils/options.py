@@ -4,8 +4,9 @@ the 'schema' package. Exports:
 
 validate_file_option: Check if a file option exists or not.
 validate_dir_option: Check if a directory option exists or not.
+validate_list_option: Check if a string option is an item in a list
 validate_dict_option: Check if a string option is a dictionary key.
-validate_list_option: Check if each of a list of items is valid.
+validate_options_list: Check if each of a list of items is valid.
 validate_int_option: Check if a string option represents an integer.
 check_boolean_value: Validates an option string represents a boolean value.
 """
@@ -61,7 +62,7 @@ def validate_dir_option(dir_option, msg, should_exist=True, nullable=False):
     Schema(validator, error=msg).validate(dir_option)
 
 
-def validate_list_option(option, item_validator, separator=','):
+def validate_options_list(option, item_validator, separator=','):
     """
     Check if each of a list of items is valid according to some validator.
 
@@ -86,6 +87,21 @@ def validate_list_option(option, item_validator, separator=','):
         return validated if validated is not None else x
 
     return [validated_value(i) for i in items]
+
+
+def validate_list_option(list_option, values_list, msg):
+    """
+    Check if a command line option is an item in a list.
+
+    Check if a command line option is an item in the specified list. If the
+    option is not in the list, a SchemaError is raised.
+
+    list_option: The command line option, a string.
+    values_list: A list in which a valid command line option should be an item.
+    msg: Text for the SchemaError exception raised if the test fails.
+    """
+    msg = "{msg}: '{opt}'.".format(msg=msg, opt=list_option)
+    Schema(lambda x: x in values_list, error=msg).validate(list_option)
 
 
 def validate_dict_option(dict_option, values_dict, msg):
