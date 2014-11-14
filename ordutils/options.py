@@ -8,6 +8,7 @@ validate_list_option: Check if a string option is an item in a list
 validate_dict_option: Check if a string option is a dictionary key.
 validate_options_list: Check if each of a list of items is valid.
 validate_int_option: Check if a string option represents an integer.
+validate_float_option: Check if an option represents a floating point number.
 check_boolean_value: Validates an option string represents a boolean value.
 """
 
@@ -83,10 +84,10 @@ def validate_options_list(option, item_validator, option_name, separator=','):
     """
     items = option.split(separator)
 
-    def validated_value(x):
-        msg = "'" + str(x) + "' is not a valid " + option_name + "."
-        validated = Schema(Use(item_validator), error=msg).validate(x)
-        return validated if validated is not None else x
+    def validated_value(val):
+        msg = "'" + str(val) + "' is not a valid " + option_name + "."
+        validated = Schema(Use(item_validator), error=msg).validate(val)
+        return validated if validated is not None else val
 
     return [validated_value(i) for i in items]
 
@@ -124,30 +125,51 @@ def validate_dict_option(dict_option, values_dict, msg):
         validate(dict_option)
 
 
-def validate_int_option(int_option, msg, nonneg=False, nullable=False):
+def validate_int_option(int_option, msg, min_val=None, nullable=False):
     """
     Check if a command line option is an integer.
 
     Check if a command line option string represents a valid integer and, if
-    so, return the integer value. If 'nonneg' is True, the integer must be
-    greater than or equal to zero. The option can be allowed to equal 'None' if
-    'nullable' is set to True. If the option is not a valid integer, a
-    SchemaError is raised.
+    so, return the integer value. If 'min_val' is specified, the integer must
+    be greater than or equal to the given minimum value. The option can be
+    allowed to equal 'None' if 'nullable' is set to True. If the option is not
+    a valid integer, a SchemaError is raised.
 
     int_option: The command line option, a string.
     msg: Text for the SchemaError exception raised if the test fails.
-    nonneg: If set to True, the integer must be positive or zero.
+    min_val: If set, the integer must be greater than or equal to this value.
     nullable: If set to True, the command line option is allowed to be 'None'
     (i.e. the option has not been specified).
     """
     msg = "{msg}: '{val}'".format(msg=msg, val=int_option)
     validator = Use(int)
-    if nonneg:
-        validator = And(validator, lambda x: x >= 0)
+    if min_val is not None:
+        validator = And(validator, lambda x: x >= min_val)
     if nullable:
         validator = _nullable_validator(validator)
 
     return Schema(validator, error=msg).validate(int_option)
+
+
+def validate_float_option(float_option, msg, min_val=None):
+    """
+    Check if a command line option is a floating point number.
+
+    Check if a command line option string represents a valid floating point
+    number and, if so, return the float value. If 'min_val' is specified, the
+    float must be greater than or equal to the given minimum value. If the
+    option is not a valid float, a SchemaError is raised.
+
+    float_option: The command line option, a string.
+    msg: Text for the SchemaError exception raised if the test fails.
+    min_val: If set, the float must be greater than or equal to this value.
+    """
+    msg = "{msg}: '{val}'".format(msg=msg, val=float_option)
+    validator = Use(float)
+    if min_val is not None:
+        validator = And(validator, lambda x: x >= min_val)
+
+    return Schema(validator, error=msg).validate(float_option)
 
 
 def check_boolean_value(option_string):
